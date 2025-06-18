@@ -18,7 +18,18 @@
           <input type="text" id="task-input" class="form-control me-2" placeholder="Add tarefa" required>
           <button type="submit" class="btn btn-success">Add</button>
         </form>
-        <ul id="task-list" class="list-group"></ul>
+
+        <div class="mb-3">
+          <button id="filter-all" class="btn btn-outline-secondary btn-sm">Todas</button>
+          <button id="filter-pending" class="btn btn-outline-primary btn-sm">Pendentes</button>
+          <button id="filter-completed" class="btn btn-outline-success btn-sm">Concluídas</button>
+        </div>
+
+        <h5 id="tasks-pendentes">Tarefas Pendentes</h5>
+        <ul id="task-list" class="list-group mb-4"></ul>
+
+        <h5 id="tasks-concluidas">Tarefas Concluídas</h5>
+        <ul id="completed-list" class="list-group"></ul>
       </div>
     </div>
   </div>

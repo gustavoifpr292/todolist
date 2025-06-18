@@ -1,16 +1,22 @@
 const form = document.getElementById('task-form');
 const input = document.getElementById('task-input');
-const list = document.getElementById('task-list');
+const taskList = document.getElementById('task-list');
+const completedList = document.getElementById('completed-list');
+const tasksPendentes = document.getElementById('tasks-pendentes');
+const tasksConcluidas = document.getElementById('tasks-concluidas');
+const filterAll = document.getElementById('filter-all');
+const filterPending = document.getElementById('filter-pending');
+const filterCompleted = document.getElementById('filter-completed');
 
+//load no localstorage
 document.addEventListener('DOMContentLoaded', carregarTarefas);
 
 function salvarTarefas() {
     const tasks = [];
-    document.querySelectorAll('#task-list li').forEach(li => {
+    document.querySelectorAll('#task-list li, #completed-list li').forEach(li => {
         tasks.push({
             text: li.querySelector('span').textContent,
-
-            completed: li.querySelector('span').classList.contains('completed')
+            completed: li.closest('#completed-list') !== null
         });
     });
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -19,55 +25,78 @@ function salvarTarefas() {
 function carregarTarefas() {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     tasks.forEach(task => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex justify-content-between align-items-center';
-        li.innerHTML = `
-            <span class="${task.completed ? 'completed' : ''}">${task.text}</span>
-            <div>
-                <button class="btn btn-success btn-sm me-1 complete-btn">✓</button>
-                <button class="btn btn-danger btn-sm delete-btn">✕</button>
-            </div>
-        `;
-        list.appendChild(li);
+        const li = criarElementoTarefa(task.text, task.completed);
+        if (task.completed) {
+            completedList.appendChild(li);
+        } else {
+            taskList.appendChild(li);
+        }
     });
 }
 
-function adicionarTarefa(taskText) {
+function criarElementoTarefa(text, completed = false) {
     const li = document.createElement('li');
     li.className = 'list-group-item d-flex justify-content-between align-items-center';
     li.innerHTML = `
-        <span>${taskText}</span>
+        <span class="${completed ? 'completed' : ''}">${text}</span>
         <div>
-            <button class="btn btn-success btn-sm me-1 complete-btn">✓</button>
-            <button class="btn btn-danger btn-sm delete-btn">✕</button>
+            <button class="btn btn-success btn-sm me-1 complete-btn">Concluir</button>
+            <button class="btn btn-danger btn-sm delete-btn">Excluir</button>
         </div>
     `;
-    list.appendChild(li);
+    return li;
+}
+
+function adicionarTarefa(text) {
+    const li = criarElementoTarefa(text);
+    taskList.appendChild(li);
     salvarTarefas();
 }
 
-// add tarefa
 form.addEventListener('submit', function(e) {
     e.preventDefault();
-    const taskText = input.value.trim();
-    if (taskText !== '') {
-        adicionarTarefa(taskText);
+    const text = input.value.trim();
+    if (text !== '') {
+        adicionarTarefa(text);
         input.value = '';
         input.focus();
     }
 });
 
-list.addEventListener('click', function(e) {
+document.addEventListener('click', function(e) {
     const li = e.target.closest('li');
-    const span = li.querySelector('span');
-    
+    if (!li) return;
+
     if (e.target.classList.contains('complete-btn')) {
-        li.remove()
+        const span = li.querySelector('span');
+        span.classList.add('completed');
+        completedList.appendChild(li); // Move para "Concluídas"
         salvarTarefas();
     }
-    
+
     if (e.target.classList.contains('delete-btn')) {
         li.remove();
         salvarTarefas();
     }
+});
+
+filterAll.addEventListener('click', () => {
+	tasksPendentes.innerHTML = "Tarefas Pendentes";
+    taskList.style.display = 'block';
+	tasksConcluidas.innerHTML = "Tarefas Concluídas";
+    completedList.style.display = 'block';
+});
+
+filterPending.addEventListener('click', () => {
+	tasksPendentes.innerHTML = "Tarefas Pendentes";
+    taskList.style.display = 'block';
+	tasksConcluidas.innerHTML = "";
+    completedList.style.display = 'none';
+});
+
+filterCompleted.addEventListener('click', () => {
+	tasksPendentes.innerHTML = "";
+    taskList.style.display = 'none';
+	tasksConcluidas.innerHTML = "Tarefas Concluídas";
+    completedList.style.display = 'block';
 });
